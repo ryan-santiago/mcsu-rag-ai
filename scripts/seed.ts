@@ -59,7 +59,7 @@ const DEMO_USERS: Array<{
 
 const DEMO_PASSWORD = "testpassword1234";
 
-const ALL_MODULES = ["dashboard", "users", "settings", "access_control"] as const;
+const ALL_MODULES = ["dashboard", "chat", "users", "settings", "access_control"] as const;
 const ALL_ACTIONS = ["read", "write", "edit", "delete"] as const;
 
 function permissionsFor(modules: readonly (typeof ALL_MODULES)[number][]): Permission[] {

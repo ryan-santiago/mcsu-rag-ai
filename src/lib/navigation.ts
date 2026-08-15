@@ -10,7 +10,7 @@ import { canAny } from "@/lib/rbac";
  * runtime. Resolve the name to a component only on the client, in
  * `NAV_ICONS` (`sidebar-nav.tsx`).
  */
-export type NavIconKey = "dashboard" | "users" | "access-control" | "settings";
+export type NavIconKey = "dashboard" | "chat" | "users" | "access-control" | "settings";
 
 /**
  * A known sub-route of a nav item, for the topbar breadcrumb trail. Plain
@@ -33,6 +33,15 @@ export type NavItem = {
   permissions?: readonly Permission[];
   /** Match child routes too, e.g. /admin/users/123 highlights User Management. */
   matchNested?: boolean;
+  /**
+   * Sidebar highlight requires an exact path match, ignoring `matchNested` —
+   * used when a sibling dynamic section (e.g. Recent Chats) does its own
+   * highlighting for the nested routes, so the two don't light up together.
+   * `matchNested` still applies for breadcrumb section-matching.
+   */
+  highlightExact?: boolean;
+  /** Root breadcrumb text when it should read differently from the sidebar label — defaults to `title`. */
+  breadcrumbTitle?: string;
   /** Known sub-routes, deepest match wins — see `breadcrumbsFor()`. */
   children?: readonly NavBreadcrumbChild[];
 };
@@ -41,6 +50,8 @@ export type NavGroup = {
   /** `null` renders the group without a heading — used for the top-level items. */
   title: string | null;
   items: readonly NavItem[];
+  /** Rendered after the static items — dynamic, per-user data fetched client-side. See `RecentChatsNav`. */
+  dynamic?: "chat-history";
 };
 
 /**
@@ -63,6 +74,24 @@ export const NAVIGATION: readonly NavGroup[] = [
         permissions: ["dashboard:read"],
       },
     ],
+  },
+  {
+    title: "Chat",
+    items: [
+      {
+        title: "New Chat",
+        href: "/chat",
+        icon: "chat",
+        permissions: ["chat:read"],
+        matchNested: true,
+        highlightExact: true,
+        breadcrumbTitle: "Chat",
+        children: [{ title: "Conversation", dynamic: true }],
+      },
+    ],
+    // Recent Chats + the actual history rows, rendered by `RecentChatsNav` —
+    // per-user data, so it can't live in this static config.
+    dynamic: "chat-history",
   },
   {
     title: "Administration",
@@ -128,8 +157,9 @@ export function breadcrumbsFor(pathname: string): Breadcrumb[] {
   const isSingleSegment = remainder.length > 0 && !remainder.includes("/");
   const dynamic = isSingleSegment ? children.find((candidate) => candidate.dynamic) : undefined;
 
+  const rootTitle = item.breadcrumbTitle ?? item.title;
   const child = exact ?? dynamic;
-  if (!child) return [{ title: item.title }];
+  if (!child) return [{ title: rootTitle }];
 
-  return [{ title: item.title, href: item.href }, { title: child.title }];
+  return [{ title: rootTitle, href: item.href }, { title: child.title }];
 }

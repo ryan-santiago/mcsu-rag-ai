@@ -41,6 +41,12 @@ export const PERMISSIONS = [
   "access_control:write",
   "access_control:edit",
   "access_control:delete",
+
+  "chat:read",
+  "chat:write",
+  /** Covers renaming a chat's title. */
+  "chat:edit",
+  "chat:delete",
 ] as const;
 
 export type Permission = (typeof PERMISSIONS)[number];
@@ -53,6 +59,7 @@ export type Permission = (typeof PERMISSIONS)[number];
  */
 export const MODULES = [
   { id: "dashboard", label: "Dashboard" },
+  { id: "chat", label: "Chat" },
   { id: "access_control", label: "Access Control" },
   { id: "users", label: "Users & Access" },
   { id: "settings", label: "Settings" },

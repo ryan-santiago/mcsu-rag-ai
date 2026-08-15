@@ -21,7 +21,7 @@ function SidebarBody({ groups, user, onNavigate }: AppSidebarProps & { onNavigat
   return (
     <>
       <div className="min-h-0 flex-1 overflow-y-auto py-4">
-        <SidebarNav groups={groups} onNavigate={onNavigate} />
+        <SidebarNav groups={groups} user={user} onNavigate={onNavigate} />
       </div>
 
       <div className="border-sidebar-border border-t p-2">

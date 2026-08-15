@@ -1,15 +1,18 @@
 "use client";
 
-import { LayoutDashboard, Settings, ShieldCheck, Users, type LucideIcon } from "lucide-react";
+import { LayoutDashboard, MessageSquare, Settings, ShieldCheck, Users, type LucideIcon } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
+import { RecentChatsNav } from "@/components/chat/recent-chats-nav";
+import { can, type Principal } from "@/lib/rbac";
 import { cn } from "@/lib/utils";
 import { isNavItemActive, type NavGroup, type NavIconKey } from "@/lib/navigation";
 
 /** Resolves the serializable icon key from `lib/navigation.ts` to a component. */
 const NAV_ICONS: Record<NavIconKey, LucideIcon> = {
   dashboard: LayoutDashboard,
+  chat: MessageSquare,
   users: Users,
   "access-control": ShieldCheck,
   settings: Settings,
@@ -17,6 +20,7 @@ const NAV_ICONS: Record<NavIconKey, LucideIcon> = {
 
 type SidebarNavProps = {
   groups: NavGroup[];
+  user: Principal;
   /** Called after a link is followed, so the mobile drawer can close itself. */
   onNavigate?: () => void;
 };
@@ -29,7 +33,7 @@ type SidebarNavProps = {
  * AI-generated content badges (see docs/DESIGN.md) — the nav rail uses the
  * general brand colour instead.
  */
-export function SidebarNav({ groups, onNavigate }: SidebarNavProps) {
+export function SidebarNav({ groups, user, onNavigate }: SidebarNavProps) {
   const pathname = usePathname();
 
   return (
@@ -44,7 +48,7 @@ export function SidebarNav({ groups, onNavigate }: SidebarNavProps) {
 
           <ul className="space-y-1">
             {group.items.map((item) => {
-              const active = isNavItemActive(item, pathname);
+              const active = item.highlightExact ? pathname === item.href : isNavItemActive(item, pathname);
               const Icon = NAV_ICONS[item.icon];
 
               return (
@@ -74,6 +78,14 @@ export function SidebarNav({ groups, onNavigate }: SidebarNavProps) {
               );
             })}
           </ul>
+
+          {group.dynamic === "chat-history" ? (
+            <RecentChatsNav
+              canEdit={can(user, "chat:edit")}
+              canDelete={can(user, "chat:delete")}
+              onNavigate={onNavigate}
+            />
+          ) : null}
         </div>
       ))}
     </nav>

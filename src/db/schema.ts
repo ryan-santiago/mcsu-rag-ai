@@ -12,6 +12,9 @@ import { boolean, index, integer, jsonb, pgEnum, pgTable, text, timestamp } from
  */
 export const userStatus = pgEnum("user_status", ["pending", "active", "suspended"]);
 
+/** `assistant` replies are placeholder-generated today — see docs/ROADMAP.md for the real RAG pipeline. */
+export const chatMessageRole = pgEnum("chat_message_role", ["user", "assistant"]);
+
 /* -------------------------------------------------------------------------- */
 /*  Roles — the RBAC anchor                                                   */
 /* -------------------------------------------------------------------------- */
@@ -212,6 +215,55 @@ export const auditLog = pgTable(
 );
 
 /* -------------------------------------------------------------------------- */
+/*  Chat                                                                      */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * A single conversation, owned by exactly one user — chat history is
+ * personal, not a shared/admin-visible record like `role` or `user`.
+ * `title` defaults to a placeholder and is renamed either by the user or
+ * automatically from the first message; see `src/server/chat/actions.ts`.
+ *
+ * Placeholder today: replies echo the prompt rather than calling a model —
+ * see docs/ARCHITECTURE.md's "Planned" section for the real RAG pipeline
+ * this table is shaped to grow into (`documentChunk` citations, etc.).
+ */
+export const chatSession = pgTable(
+  "chat_session",
+  {
+    id: text("id").primaryKey(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    title: text("title").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .$defaultFn(() => new Date())
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .$defaultFn(() => new Date())
+      .$onUpdate(() => new Date())
+      .notNull(),
+  },
+  (table) => [index("chat_session_user_id_idx").on(table.userId)],
+);
+
+export const chatMessage = pgTable(
+  "chat_message",
+  {
+    id: text("id").primaryKey(),
+    sessionId: text("session_id")
+      .notNull()
+      .references(() => chatSession.id, { onDelete: "cascade" }),
+    role: chatMessageRole("role").notNull(),
+    content: text("content").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .$defaultFn(() => new Date())
+      .notNull(),
+  },
+  (table) => [index("chat_message_session_id_idx").on(table.sessionId)],
+);
+
+/* -------------------------------------------------------------------------- */
 /*  Relations                                                                 */
 /* -------------------------------------------------------------------------- */
 
@@ -223,6 +275,7 @@ export const userRelations = relations(user, ({ one, many }) => ({
   role: one(role, { fields: [user.roleId], references: [role.id] }),
   sessions: many(session),
   accounts: many(account),
+  chatSessions: many(chatSession),
 }));
 
 export const sessionRelations = relations(session, ({ one }) => ({
@@ -237,6 +290,15 @@ export const auditLogRelations = relations(auditLog, ({ one }) => ({
   actor: one(user, { fields: [auditLog.actorId], references: [user.id] }),
 }));
 
+export const chatSessionRelations = relations(chatSession, ({ one, many }) => ({
+  user: one(user, { fields: [chatSession.userId], references: [user.id] }),
+  messages: many(chatMessage),
+}));
+
+export const chatMessageRelations = relations(chatMessage, ({ one }) => ({
+  session: one(chatSession, { fields: [chatMessage.sessionId], references: [chatSession.id] }),
+}));
+
 /* -------------------------------------------------------------------------- */
 /*  Inferred types                                                            */
 /* -------------------------------------------------------------------------- */
@@ -247,3 +309,6 @@ export type Session = typeof session.$inferSelect;
 export type AuditLog = typeof auditLog.$inferSelect;
 export type Role = typeof role.$inferSelect;
 export type UserStatus = (typeof userStatus.enumValues)[number];
+export type ChatSession = typeof chatSession.$inferSelect;
+export type ChatMessage = typeof chatMessage.$inferSelect;
+export type ChatMessageRole = (typeof chatMessageRole.enumValues)[number];
