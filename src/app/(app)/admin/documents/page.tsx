@@ -31,7 +31,7 @@ export default async function DocumentsPage() {
     <div className="mx-auto w-full max-w-7xl space-y-6">
       <PageHeader
         title="Documentation"
-        description="Upload and manage the files MINAI will eventually search and answer questions from."
+        description="Upload and manage the files ReadTheMemo will eventually search and answer questions from."
       />
 
       <HydrationBoundary state={dehydrate(queryClient)}>

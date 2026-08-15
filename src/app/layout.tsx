@@ -20,12 +20,12 @@ const jetbrainsMono = JetBrains_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "MINAI",
-    template: "%s · MINAI",
+    default: "ReadTheMemo",
+    template: "%s · ReadTheMemo",
   },
   description:
-    "MINAI — Managed Intelligent Network for Advanced Insights. Questronix Corporation's internal document search and AI chat console.",
-  applicationName: "MINAI",
+    "ReadTheMemo — for when you really, really should have known. Questronix Corporation's internal document search and AI chat console.",
+  applicationName: "ReadTheMemo",
   robots: { index: false, follow: false },
 };
 

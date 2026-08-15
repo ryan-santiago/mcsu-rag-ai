@@ -4,7 +4,7 @@ Everything about access control lives in `src/lib/rbac.ts`, `src/lib/session.ts`
 and `src/server/roles/`. This document explains the model and how to extend
 it. It's unchanged from mcsu-app's own RBAC.md except for the permission
 list, which is much shorter here — no Employees/Projects/Maintenance/Audit
-Trail modules exist in MINAI yet.
+Trail modules exist in ReadTheMemo yet.
 
 ---
 
@@ -176,7 +176,7 @@ already happen so one can be added without touching the write side.
 ## No Employee-matched identity
 
 mcsu-app matches a signed-in user's email against an Employee record to show
-an HR-sourced display name and position. MINAI has no Employees module, so
+an HR-sourced display name and position. ReadTheMemo has no Employees module, so
 `CurrentUser`/`ManagedUser` just carry the account's own `name` — nothing is
 derived or matched. Don't reintroduce that pattern unless a real identity
 domain gets added later.

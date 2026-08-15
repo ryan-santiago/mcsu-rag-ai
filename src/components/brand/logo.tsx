@@ -1,15 +1,20 @@
+import Image from "next/image";
+
 import { cn } from "@/lib/utils";
 
 /**
- * Placeholder wordmark — there is no master logo artwork yet (the user will
- * supply one later). `Logo`/`BrandMark` keep the same prop shape mcsu-app's
- * image-based lockup used (`variant`, `height`/`size`, `className`,
- * `priority`) so swapping this for a real derived-asset pipeline later (see
- * `docs/DESIGN.md`) touches only this file, not any caller.
- *
- * `priority` is accepted but unused — it only matters for `next/image`, kept
- * here so call sites don't need to change when this becomes an `<Image>`.
+ * Real artwork, supplied by the user — `public/brand/readthememo-mark.png`
+ * (the mascot mark alone; the combined Questronix + ReadTheMemo lockup lives
+ * at `public/brand/qnx-and-readthememo-lockup.png` for contexts that need
+ * both brands together, not wired up anywhere yet). `Logo`/`BrandMark` keep
+ * the same prop shape mcsu-app's own image-based lockup used (`variant`,
+ * `height`/`size`, `className`, `priority`), so this is now that pipeline,
+ * not a placeholder.
  */
+
+const MARK_SRC = "/brand/readthememo-mark.png";
+/** The source PNG's actual pixel size — square. */
+const MARK_INTRINSIC_SIZE = 1254;
 
 type LogoProps = {
   variant?: "colour" | "white";
@@ -19,7 +24,7 @@ type LogoProps = {
   priority?: boolean;
 };
 
-export function Logo({ variant = "colour", height = 40, className }: LogoProps) {
+export function Logo({ variant = "colour", height = 40, className, priority }: LogoProps) {
   const isWhite = variant === "white";
 
   return (
@@ -27,56 +32,66 @@ export function Logo({ variant = "colour", height = 40, className }: LogoProps) 
       className={cn("inline-flex items-center gap-[0.4em] leading-none select-none", className)}
       style={{ fontSize: height * 0.62 }}
       role="img"
-      aria-label="MINAI"
+      aria-label="ReadTheMemo"
     >
-      <BrandMark variant={variant} size={height} />
+      <BrandMark variant={variant} size={height} priority={priority} />
       <span
         className={cn("font-bold tracking-tight", isWhite ? "text-white" : "text-foreground")}
         style={{ fontSize: "1em" }}
       >
-        MINAI
+        ReadTheMemo
       </span>
     </span>
   );
 }
 
-const MARK_ASPECT = 1;
-
 type MarkProps = {
   variant?: "colour" | "white";
   size?: number;
   className?: string;
+  priority?: boolean;
 };
 
-/** The node-cluster mark on its own — for tight spaces and the collapsed nav. */
-export function BrandMark({ variant = "colour", size = 32, className }: MarkProps) {
+/**
+ * The mascot mark on its own — for tight spaces and the collapsed nav.
+ *
+ * The artwork is dark-navy-heavy, so on its own it would nearly disappear
+ * against the (always-dark) auth brand panel — `variant="white"` wraps it in
+ * a translucent light chip so it stays legible there, same reasoning the
+ * previous SVG mark's background rect had, just as a backdrop now instead of
+ * a fill.
+ */
+export function BrandMark({ variant = "colour", size = 32, className, priority }: MarkProps) {
   const isWhite = variant === "white";
 
+  const mark = (
+    <Image
+      src={MARK_SRC}
+      alt=""
+      width={MARK_INTRINSIC_SIZE}
+      height={MARK_INTRINSIC_SIZE}
+      priority={priority}
+      className="size-full object-contain"
+    />
+  );
+
+  if (!isWhite) {
+    return (
+      <span
+        className={cn("inline-flex shrink-0 select-none", className)}
+        style={{ width: size, height: size }}
+      >
+        {mark}
+      </span>
+    );
+  }
+
   return (
-    <svg
-      viewBox="0 0 32 32"
-      width={Math.round(size * MARK_ASPECT)}
-      height={size}
-      className={cn("shrink-0 select-none", className)}
-      aria-hidden
+    <span
+      className={cn("inline-flex shrink-0 select-none rounded-full bg-white/90 p-[0.12em]", className)}
+      style={{ width: size, height: size }}
     >
-      <rect
-        width="32"
-        height="32"
-        rx="8"
-        fill={isWhite ? "rgba(255,255,255,0.12)" : "var(--primary)"}
-      />
-      <g stroke={isWhite ? "#fff" : "#fff"} strokeWidth="1.4" strokeLinecap="round">
-        <line x1="10" y1="10" x2="16" y2="16" />
-        <line x1="22" y1="10" x2="16" y2="16" />
-        <line x1="10" y1="22" x2="16" y2="16" />
-        <line x1="22" y1="22" x2="16" y2="16" />
-      </g>
-      <circle cx="16" cy="16" r="2.6" fill={isWhite ? "#fff" : "#fff"} />
-      <circle cx="10" cy="10" r="1.6" fill={isWhite ? "#fff" : "#fff"} opacity="0.85" />
-      <circle cx="22" cy="10" r="1.6" fill={isWhite ? "#fff" : "#fff"} opacity="0.85" />
-      <circle cx="10" cy="22" r="1.6" fill={isWhite ? "#fff" : "#fff"} opacity="0.85" />
-      <circle cx="22" cy="22" r="1.6" fill={isWhite ? "#fff" : "#fff"} opacity="0.85" />
-    </svg>
+      {mark}
+    </span>
   );
 }

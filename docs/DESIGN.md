@@ -1,9 +1,9 @@
-# Design System — MINAI
+# Design System — ReadTheMemo
 
-The visual language for MINAI. Slate/midnight neutrals, a cyan-teal primary,
-and a coral/peach accent reserved strictly for AI-generated content badges —
-"crisp and clean" in light mode, "premium and immersive" in dark, per the
-brief this was built from.
+The visual language for ReadTheMemo. Slate/midnight neutrals, a cyan-teal
+primary, and a coral/peach accent reserved strictly for AI-generated content
+badges — "crisp and clean" in light mode, "premium and immersive" in dark,
+per the brief this was built from.
 
 ---
 
@@ -11,16 +11,20 @@ brief this was built from.
 
 ### Source of truth
 
-There is **no master logo artwork yet** — the user will supply one later.
-`src/components/brand/logo.tsx` renders a placeholder wordmark (a small
-node-cluster mark + "MINAI" text) built entirely from CSS/SVG, with the same
-prop shape (`variant`, `height`/`size`, `className`, `priority`) mcsu-app's
-image-based lockup used. When real artwork arrives, only that one file needs
-to change — no caller does.
+Real artwork, supplied by the user: `public/brand/readthememo-mark.png` (the
+mascot mark alone) and `public/brand/qnx-and-readthememo-lockup.png` (the
+combined Questronix + ReadTheMemo lockup with tagline, for contexts that need
+both brands together — not wired up anywhere yet).
+`src/components/brand/logo.tsx` renders the mark via `next/image` next to a
+"ReadTheMemo" text wordmark, with the same prop shape (`variant`,
+`height`/`size`, `className`, `priority`) mcsu-app's own image-based lockup
+used. `variant="white"` (the auth brand panel) wraps the mark in a
+translucent light chip, since the artwork is dark-navy-heavy and would
+otherwise disappear against the panel's midnight background.
 
-`public/favicon.ico` is likewise a generic placeholder. Replace it (and add a
-`public/brand/` asset pipeline modelled on mcsu-app's
-`scripts/build-brand-assets.mjs`, if warranted) once real artwork exists.
+The favicon uses Next's `icon`/`apple-icon` file convention —
+`src/app/icon.png` and `src/app/apple-icon.png`, both the mascot mark —
+rather than a hand-built `.ico`.
 
 ### Colours
 

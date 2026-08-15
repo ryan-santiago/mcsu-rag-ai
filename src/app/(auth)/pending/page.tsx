@@ -39,8 +39,8 @@ export default async function PendingPage({ searchParams }: PageProps<"/pending"
           </h1>
           <p className="text-muted-foreground text-sm leading-relaxed">
             {justRegistered
-              ? "Your request has been sent to the MINAI administrators. You'll be able to sign in once someone approves it and assigns your role."
-              : "This account has not been approved yet. A MINAI administrator needs to review it before you can sign in."}
+              ? "Your request has been sent to the ReadTheMemo administrators. You'll be able to sign in once someone approves it and assigns your role."
+              : "This account has not been approved yet. A ReadTheMemo administrator needs to review it before you can sign in."}
           </p>
         </div>
       </header>
@@ -76,7 +76,7 @@ export default async function PendingPage({ searchParams }: PageProps<"/pending"
 
         <p className="text-muted-foreground flex items-center justify-center gap-1.5 text-xs">
           <Mail className="size-3.5" aria-hidden />
-          Need it sooner? Contact your MINAI administrator directly.
+          Need it sooner? Contact your ReadTheMemo administrator directly.
         </p>
       </div>
     </div>

@@ -33,7 +33,7 @@ export function AppTopbar({ groups, user }: AppTopbarProps) {
 
       <div className="min-w-0 flex-1">
         {trail.length === 0 ? (
-          <h1 className="truncate text-base font-semibold tracking-tight">MINAI</h1>
+          <h1 className="truncate text-base font-semibold tracking-tight">ReadTheMemo</h1>
         ) : (
           <Breadcrumb>
             <BreadcrumbList className="flex-nowrap text-base">

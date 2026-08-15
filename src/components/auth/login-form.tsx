@@ -89,7 +89,7 @@ export function LoginForm() {
   return (
     <div className="space-y-8">
       <header className="space-y-2">
-        <h1 className="text-2xl font-semibold tracking-tight">Sign in to MINAI</h1>
+        <h1 className="text-2xl font-semibold tracking-tight">Sign in to ReadTheMemo</h1>
         <p className="text-muted-foreground text-sm">
           Use your Questronix work email to continue.
         </p>

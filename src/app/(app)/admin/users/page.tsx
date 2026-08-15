@@ -37,7 +37,7 @@ export default async function UserManagementPage() {
     <div className="mx-auto w-full max-w-7xl space-y-6">
       <PageHeader
         title="User Management"
-        description="Approve access requests, assign roles and manage who can sign in to MINAI."
+        description="Approve access requests, assign roles and manage who can sign in to ReadTheMemo."
       />
 
       <HydrationBoundary state={dehydrate(queryClient)}>

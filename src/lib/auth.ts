@@ -15,12 +15,12 @@ import { diffFields, recordAudit } from "@/lib/audit";
  * Shown when a registered-but-unapproved user tries to sign in. The login form
  * matches on this text to route them to the friendlier /pending screen.
  */
-export const PENDING_APPROVAL_MESSAGE = "Your account is awaiting approval from a MINAI administrator.";
+export const PENDING_APPROVAL_MESSAGE = "Your account is awaiting approval from a ReadTheMemo administrator.";
 
-export const SUSPENDED_MESSAGE = "Your account has been suspended. Contact a MINAI administrator for help.";
+export const SUSPENDED_MESSAGE = "Your account has been suspended. Contact a ReadTheMemo administrator for help.";
 
 export const auth = betterAuth({
-  appName: "MINAI",
+  appName: "ReadTheMemo",
   baseURL: env.BETTER_AUTH_URL,
   secret: env.BETTER_AUTH_SECRET,
 

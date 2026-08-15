@@ -41,7 +41,7 @@ let auth: typeof authClient;
 const ADMIN = {
   email: (process.env.SEED_ADMIN_EMAIL ?? "minai_automations@questronix.com.ph").toLowerCase(),
   password: process.env.SEED_ADMIN_PASSWORD ?? "admin12345",
-  name: process.env.SEED_ADMIN_NAME ?? "MINAI Administrator",
+  name: process.env.SEED_ADMIN_NAME ?? "ReadTheMemo Administrator",
 };
 
 const DEMO_USERS: Array<{
@@ -182,7 +182,7 @@ async function main() {
 
   const withDemo = process.argv.includes("--with-demo-users");
 
-  console.log("\nSeeding MINAI\n");
+  console.log("\nSeeding ReadTheMemo\n");
 
   console.log("Roles:");
   await seedRoles();

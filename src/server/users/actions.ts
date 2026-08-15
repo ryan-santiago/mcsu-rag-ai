@@ -300,6 +300,6 @@ export async function deleteUser(input: { userId: string }): Promise<ActionResul
     await db.delete(user).where(eq(user.id, userId));
 
     refreshUserViews();
-    return { ok: true, data: undefined, message: `${target.name} removed from MINAI.` };
+    return { ok: true, data: undefined, message: `${target.name} removed from ReadTheMemo.` };
   });
 }

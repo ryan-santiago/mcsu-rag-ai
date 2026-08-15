@@ -6,7 +6,7 @@ import { createAuthClient } from "better-auth/react";
 import type { Auth } from "@/lib/auth";
 
 /**
- * `inferAdditionalFields` carries the MINAI-specific user columns (role, status…)
+ * `inferAdditionalFields` carries the ReadTheMemo-specific user columns (role, status…)
  * through to the client's types without duplicating the declaration.
  */
 export const authClient = createAuthClient({

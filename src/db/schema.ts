@@ -73,7 +73,7 @@ export const role = pgTable(
 /* -------------------------------------------------------------------------- */
 
 /**
- * Matches BetterAuth's expected `user` model, extended with the MINAI fields
+ * Matches BetterAuth's expected `user` model, extended with the ReadTheMemo fields
  * declared under `user.additionalFields` in `src/lib/auth.ts`. Column names on
  * the JS side must stay in sync with that config.
  */
@@ -88,7 +88,7 @@ export const user = pgTable(
       .notNull(),
     image: text("image"),
 
-    // --- MINAI fields ---
+    // --- ReadTheMemo fields ---
     roleId: text("role_id")
       .notNull()
       .references(() => role.id, { onDelete: "restrict" }),

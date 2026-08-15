@@ -1,9 +1,9 @@
-# MINAI
+# ReadTheMemo
 
-**M**anaged **I**ntelligent **N**etwork for **A**dvanced **I**nsights —
+*For when you really, really should have known.*
 Questronix Corporation's internal document search and AI chat console.
 
-MINAI is scaffolded from [mcsu-app](../mcsu-app), Questronix's MCSU console,
+ReadTheMemo is scaffolded from [mcsu-app](../mcsu-app), Questronix's MCSU console,
 and shares its stack and conventions: Next.js 16 (App Router), React 19,
 Tailwind 4 + shadcn/ui, BetterAuth, Drizzle on Neon Postgres, and TanStack
 Query. This first pass ships the authenticated shell — Dashboard and

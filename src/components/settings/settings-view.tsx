@@ -5,7 +5,7 @@ import { STATUS_LABELS } from "@/lib/rbac";
 import type { CurrentUser } from "@/lib/session";
 
 /**
- * There is no Employee record in MINAI (that was mcsu-app's HR module, not
+ * There is no Employee record in ReadTheMemo (that was mcsu-app's HR module, not
  * ported here — see docs/ROADMAP.md), so unlike mcsu-app's Settings & Profile
  * this has no self-service change-request flow. Just the account's own
  * identity, read-only, plus the password form.
@@ -16,7 +16,7 @@ export function SettingsView({ user }: { user: CurrentUser }) {
       <Card>
         <CardHeader>
           <CardTitle>Account</CardTitle>
-          <CardDescription>Your identity in MINAI.</CardDescription>
+          <CardDescription>Your identity in ReadTheMemo.</CardDescription>
         </CardHeader>
         <CardContent className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-1">

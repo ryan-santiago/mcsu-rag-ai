@@ -99,7 +99,7 @@ export function RegisterForm() {
   return (
     <div className="space-y-8">
       <header className="space-y-2">
-        <h1 className="text-2xl font-semibold tracking-tight">Request MINAI access</h1>
+        <h1 className="text-2xl font-semibold tracking-tight">Request ReadTheMemo access</h1>
         <p className="text-muted-foreground text-sm">
           Create your account, then an administrator will approve it and assign
           your role.

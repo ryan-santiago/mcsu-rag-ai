@@ -18,7 +18,7 @@ What is built, what is deliberately missing, and what to build next.
 - User Management: search, status filters, approve with role assignment,
   reject, role change, suspend/reinstate, remove
 - Settings & Profile: account identity card + change password
-- Placeholder wordmark branding — no master logo artwork yet
+- Real ReadTheMemo brand assets: logo, mark and favicon (`src/components/brand/logo.tsx`, `src/app/icon.png`)
 
 ---
 
@@ -29,9 +29,8 @@ Each of these is a decision, not an oversight.
 | Gap | Why | Cost to add |
 | --- | --- | ----------- |
 | The actual product (upload/embed/chat) | This pass only scaffolds the shell — see "Planned" in [ARCHITECTURE.md](./ARCHITECTURE.md#planned-rag-pipeline) | The real work — next milestone |
-| Real logo/brand assets | User will supply artwork later | Swap `src/components/brand/logo.tsx` for an image-based lockup + asset pipeline, modelled on mcsu-app's `scripts/build-brand-assets.mjs` |
 | Audit Trail screen | Not asked for in this pass — the write path (`recordAudit()`) already exists and is used by login/users/roles | A read-only page + filters, same shape as mcsu-app's `/admin/audit` |
-| Employees/Projects/Maintenance modules | Out of scope — MINAI is not an HR/ops tool | N/A — these are mcsu-app-specific, not planned here |
+| Employees/Projects/Maintenance modules | Out of scope — ReadTheMemo is not an HR/ops tool | N/A — these are mcsu-app-specific, not planned here |
 | Email verification / password reset | No transactional sender configured. Admin approval/reset is the gate instead | ~half a day with Resend, same as mcsu-app |
 | Sign-in rate limiting | Internal-only for now | ~1 hour — BetterAuth's `rateLimit` option |
 | Two-factor auth | Not requested | ~1 day — BetterAuth `twoFactor` plugin |
@@ -55,13 +54,7 @@ Upload → parse/chunk → embed → pgvector → retrieve → chat, per
 4. `chatSession`/`chatMessage` persistence so history survives a reload.
 5. Citations — surface which chunks/documents backed an answer.
 
-### 2. Real branding
-
-Once artwork exists: rebuild `src/components/brand/logo.tsx` as an
-image-based lockup, add a `scripts/build-brand-assets.mjs` pipeline (modelled
-on mcsu-app's), and replace `public/favicon.ico`.
-
-### 3. Tests
+### 2. Tests
 
 Same order mcsu-app recommends: Vitest on `src/lib/rbac.ts` first (pure
 functions, highest security value per line), then server actions against a

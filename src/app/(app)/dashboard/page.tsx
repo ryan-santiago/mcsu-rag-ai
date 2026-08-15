@@ -23,7 +23,7 @@ export default async function DashboardPage() {
     <div className="mx-auto w-full max-w-7xl space-y-6">
       <PageHeader
         title={`Welcome back, ${firstName}`}
-        description="MINAI — Managed Intelligent Network for Advanced Insights."
+        description="ReadTheMemo — for when you really, really should have known."
       />
 
       <EmptyState

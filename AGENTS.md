@@ -4,11 +4,11 @@ This version has breaking changes — APIs, conventions, and file structure may 
 
 This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
 
-# MINAI — working notes
+# ReadTheMemo — working notes
 
 Internal document search and AI chat console for Questronix Corporation,
 scaffolded from [mcsu-app](../mcsu-app) — same stack, same conventions,
-separate database, separate branding. See `README.md` for what MINAI is.
+separate database, separate branding. See `README.md` for what ReadTheMemo is.
 
 ## Read first
 

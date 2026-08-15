@@ -18,7 +18,7 @@ export default function GlobalError({
   reset: () => void;
 }) {
   React.useEffect(() => {
-    console.error("[minai] unhandled error", error);
+    console.error("[readthememo] unhandled error", error);
   }, [error]);
 
   return (

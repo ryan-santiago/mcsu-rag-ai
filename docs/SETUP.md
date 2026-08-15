@@ -32,11 +32,11 @@ npm install
 ## 2. Create the database
 
 1. Sign in to [console.neon.tech](https://console.neon.tech) → **New Project**.
-2. Name it `minai`, pick the region closest to your users.
+2. Name it `readthememo`, pick the region closest to your users.
 3. **Connect** → copy the **pooled** connection string:
 
    ```
-   postgresql://neondb_owner:xxxx@ep-cool-name-pooler.ap-southeast-1.aws.neon.tech/minai?sslmode=require
+   postgresql://neondb_owner:xxxx@ep-cool-name-pooler.ap-southeast-1.aws.neon.tech/readthememo?sslmode=require
    ```
 
    Use the **pooled** endpoint (`-pooler` in the host).
@@ -67,7 +67,7 @@ Fill in:
 npm run db:migrate
 ```
 
-There is no pre-existing migration history to port from mcsu-app — MINAI's
+There is no pre-existing migration history to port from mcsu-app — ReadTheMemo's
 schema starts fresh at `drizzle/0000_initial_schema.sql`.
 
 ```bash

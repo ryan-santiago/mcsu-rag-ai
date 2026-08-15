@@ -36,7 +36,7 @@ export function AppSidebar({ groups, user }: AppSidebarProps) {
   return (
     <aside className="bg-sidebar border-sidebar-border hidden w-64 shrink-0 flex-col border-r lg:flex">
       <div className="border-sidebar-border flex h-16 items-center border-b px-5">
-        <Link href="/dashboard" aria-label="MINAI — Dashboard">
+        <Link href="/dashboard" aria-label="ReadTheMemo — Dashboard">
           <Logo height={26} priority />
         </Link>
       </div>

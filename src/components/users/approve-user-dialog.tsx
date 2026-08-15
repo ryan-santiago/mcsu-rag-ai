@@ -84,7 +84,7 @@ function ApproveDialogBody({
       <DialogHeader>
         <DialogTitle>Approve access</DialogTitle>
         <DialogDescription>
-          Grant <span className="text-foreground font-medium">{user.name}</span> access to MINAI and
+          Grant <span className="text-foreground font-medium">{user.name}</span> access to ReadTheMemo and
           choose the role they should hold.
         </DialogDescription>
       </DialogHeader>

@@ -1,4 +1,4 @@
-# Architecture — MINAI
+# Architecture — ReadTheMemo
 
 How the pieces fit, and why they were chosen. Read this before adding a feature.
 
@@ -41,8 +41,7 @@ src/
     forbidden.tsx      403 boundary, rendered by forbidden()
     error.tsx          Top-level error boundary
   components/
-    brand/             Logo, BrandMark — a placeholder text wordmark today,
-                        see docs/DESIGN.md
+    brand/             Logo, BrandMark — real artwork, see docs/DESIGN.md
     auth/              Login and registration forms
     layout/            Sidebar, topbar, user menu, PageHeader, EmptyState
     users/             User Management table, badges, dialogs

@@ -31,7 +31,7 @@ export default async function AiSettingsPage() {
     <div className="mx-auto w-full max-w-3xl space-y-6">
       <PageHeader
         title="AI Settings"
-        description="Choose how MINAI turns documents into embeddings, and how chat answers questions from them."
+        description="Choose how ReadTheMemo turns documents into embeddings, and how chat answers questions from them."
       />
 
       <HydrationBoundary state={dehydrate(queryClient)}>

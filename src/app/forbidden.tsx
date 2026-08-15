@@ -15,7 +15,7 @@ export default function Forbidden() {
         <h1 className="text-2xl font-semibold tracking-tight">You don&apos;t have access</h1>
         <p className="text-muted-foreground text-sm leading-relaxed">
           Your role doesn&apos;t include permission for this page. If you need it,
-          ask a MINAI administrator to review your access.
+          ask a ReadTheMemo administrator to review your access.
         </p>
       </div>
 

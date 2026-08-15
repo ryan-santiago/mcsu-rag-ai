@@ -5,7 +5,7 @@
 @custom-variant dark (&:is(.dark *));
 
 /* ==========================================================================
-   MINAI theme
+   ReadTheMemo theme
    --------------------------------------------------------------------------
    Slate/midnight neutrals with a cyan-teal primary and a coral/peach accent
    reserved strictly for "AI generated" badges, converted to OKLCH so tints

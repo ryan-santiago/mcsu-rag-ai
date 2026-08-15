@@ -73,7 +73,7 @@ export function ChatConversation({ messages, isLoadingMessages, isSending, canWr
               }
             }}
             disabled={!canWrite || isSending}
-            placeholder={canWrite ? "Message MINAI…" : "You don't have permission to send messages."}
+            placeholder={canWrite ? "Message ReadTheMemo…" : "You don't have permission to send messages."}
             className="min-h-11"
             rows={1}
           />

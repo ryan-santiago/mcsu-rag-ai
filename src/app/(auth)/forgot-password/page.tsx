@@ -26,7 +26,7 @@ export default function ForgotPasswordPage() {
           <h1 className="text-2xl font-semibold tracking-tight">Reset your password</h1>
           <p className="text-muted-foreground text-sm leading-relaxed">
             Self-service password reset isn&apos;t switched on yet — the console
-            has no outbound email configured. Ask a MINAI administrator to reset
+            has no outbound email configured. Ask a ReadTheMemo administrator to reset
             it for you.
           </p>
         </div>
