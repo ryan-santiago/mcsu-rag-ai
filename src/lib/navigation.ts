@@ -10,7 +10,14 @@ import { canAny } from "@/lib/rbac";
  * runtime. Resolve the name to a component only on the client, in
  * `NAV_ICONS` (`sidebar-nav.tsx`).
  */
-export type NavIconKey = "dashboard" | "chat" | "users" | "access-control" | "settings";
+export type NavIconKey =
+  | "dashboard"
+  | "chat"
+  | "documents"
+  | "ai-settings"
+  | "users"
+  | "access-control"
+  | "settings";
 
 /**
  * A known sub-route of a nav item, for the topbar breadcrumb trail. Plain
@@ -96,6 +103,20 @@ export const NAVIGATION: readonly NavGroup[] = [
   {
     title: "Administration",
     items: [
+      {
+        title: "Documentation",
+        href: "/admin/documents",
+        icon: "documents",
+        permissions: ["documents:read"],
+        matchNested: true,
+      },
+      {
+        title: "AI Settings",
+        href: "/admin/ai-settings",
+        icon: "ai-settings",
+        permissions: ["ai_settings:read"],
+        matchNested: true,
+      },
       {
         title: "Access Control",
         href: "/admin/access-control",

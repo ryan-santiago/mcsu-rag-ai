@@ -24,6 +24,18 @@ export function formatDateTime(value: Date | string | null): string {
   return Number.isNaN(date.getTime()) ? "—" : dateTimeFormatter.format(date);
 }
 
+const BYTE_UNITS = ["B", "KB", "MB", "GB"] as const;
+
+/** "482 B" / "3.4 MB" / "1.2 GB" — one decimal place past the first unit. */
+export function formatBytes(bytes: number): string {
+  if (bytes <= 0) return "0 B";
+
+  const exponent = Math.min(Math.floor(Math.log(bytes) / Math.log(1024)), BYTE_UNITS.length - 1);
+  const value = bytes / 1024 ** exponent;
+
+  return `${exponent === 0 ? value : value.toFixed(1)} ${BYTE_UNITS[exponent]}`;
+}
+
 /** "Just now" / "5m ago" / "3h ago" / "2d ago", falling back to a plain date past a week. */
 export function formatRelative(value: Date | string | null): string {
   if (!value) return "Never";

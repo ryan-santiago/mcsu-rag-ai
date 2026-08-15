@@ -17,6 +17,8 @@ export const AUDIT_MODULES = [
   { value: "auth", label: "Authentication" },
   { value: "roles", label: "Access Control" },
   { value: "chat", label: "Chat" },
+  { value: "documents", label: "Documentation" },
+  { value: "ai_settings", label: "AI Settings" },
 ] as const;
 
 export type AuditModule = (typeof AUDIT_MODULES)[number]["value"];
@@ -37,4 +39,8 @@ export const AUDIT_ACTIONS = [
   { value: "renamed", label: "Renamed" },
   { value: "deleted", label: "Deleted" },
   { value: "login", label: "Signed in" },
+  { value: "uploaded", label: "Uploaded" },
+  { value: "replaced", label: "Replaced" },
+  { value: "embedded", label: "Embedded" },
+  { value: "embedding_failed", label: "Embedding failed" },
 ] as const;

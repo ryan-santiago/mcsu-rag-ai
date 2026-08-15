@@ -1,12 +1,22 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { and, eq } from "drizzle-orm";
+import { and, desc, eq } from "drizzle-orm";
 import { z } from "zod";
 
 import { db } from "@/db";
 import { chatMessage, chatSession } from "@/db/schema";
 import { diffFields, recordAudit } from "@/lib/audit";
+import { getAiSettingsRow } from "@/lib/ai-settings/store";
+import { getActiveChatProvider, type ChatCompletionMessage } from "@/lib/chat-completion";
+import {
+  buildSystemPrompt,
+  moderateOutput,
+  stripSourcesWhenUnanswered,
+  MODERATION_REFUSAL_MESSAGE,
+} from "@/lib/guardrails";
+import { checkChatRateLimit } from "@/lib/rate-limit";
+import { retrieveRelevantChunks } from "@/lib/retrieval";
 import { authorize, AuthorizationError, type CurrentUser } from "@/lib/session";
 
 import { listChatMessages, listChatSessions } from "./queries";
@@ -17,6 +27,11 @@ const titleSchema = z.string().trim().min(1, "Name is required").max(80, "That n
 const contentSchema = z.string().trim().min(1, "Type a message first").max(4000, "That message is too long");
 
 const DEFAULT_TITLE = "New chat";
+const DEFAULT_RETRIEVAL_TOP_K = 5;
+const DEFAULT_TEMPERATURE = 0.4;
+const DEFAULT_RATE_LIMIT_PER_MINUTE = 10;
+/** How many prior messages (both roles) to include as conversation context, oldest first. */
+const HISTORY_LIMIT = 20;
 
 async function run<T>(fn: () => Promise<ActionResult<T>>): Promise<ActionResult<T>> {
   try {
@@ -54,6 +69,18 @@ function titleFromContent(content: string): string {
   return `${firstLine.slice(0, 60).trimEnd()}…`;
 }
 
+/** The last `HISTORY_LIMIT` messages in a session, oldest first, shaped for the chat provider. */
+async function loadRecentHistory(sessionId: string): Promise<ChatCompletionMessage[]> {
+  const rows = await db
+    .select({ role: chatMessage.role, content: chatMessage.content })
+    .from(chatMessage)
+    .where(eq(chatMessage.sessionId, sessionId))
+    .orderBy(desc(chatMessage.createdAt))
+    .limit(HISTORY_LIMIT);
+
+  return rows.reverse();
+}
+
 /* -------------------------------------------------------------------------- */
 /*  Read                                                                      */
 /* -------------------------------------------------------------------------- */
@@ -72,14 +99,18 @@ export async function fetchChatMessages(sessionId: string): Promise<ChatMessage[
 /* -------------------------------------------------------------------------- */
 
 /**
- * Sends a message and appends a placeholder reply.
+ * Sends a message and generates a real, retrieval-augmented reply.
  *
  * `sessionId: null` starts a new chat — created here rather than as a
  * separate step, so clicking "New Chat" never writes an empty, title-less
  * row if the user navigates away without typing anything.
  *
- * The assistant's reply is a placeholder that echoes the prompt — there is
- * no model wired up yet, see docs/ARCHITECTURE.md's "Planned" RAG pipeline.
+ * Rate-limited before anything is written (see `checkChatRateLimit()`), so a
+ * throttled request doesn't leave a dangling user message with no reply. A
+ * provider failure (Ollama unreachable, API error) still produces an
+ * assistant message — a clear in-thread error rather than a lost toast —
+ * so the conversation stays coherent and the user's own message isn't
+ * orphaned.
  */
 export async function sendChatMessage(input: {
   sessionId: string | null;
@@ -88,6 +119,15 @@ export async function sendChatMessage(input: {
   return run(async () => {
     const actor = await authorize("chat:write");
     const content = contentSchema.parse(input.content);
+
+    const settings = await getAiSettingsRow();
+    const rateLimit = await checkChatRateLimit(
+      actor.id,
+      settings?.rateLimitPerMinute ?? DEFAULT_RATE_LIMIT_PER_MINUTE,
+    );
+    if (!rateLimit.allowed) {
+      return { ok: false, error: "You're sending messages too quickly — wait a moment and try again." };
+    }
 
     let sessionId = input.sessionId;
 
@@ -114,10 +154,18 @@ export async function sendChatMessage(input: {
       .values({ id: crypto.randomUUID(), sessionId, role: "user", content })
       .returning();
 
-    // Placeholder: echoes the prompt back rather than calling a model.
+    const replyContent = await generateReply({
+      sessionId,
+      settings: {
+        retrievalTopK: settings?.retrievalTopK ?? DEFAULT_RETRIEVAL_TOP_K,
+        temperature: settings?.temperature ?? DEFAULT_TEMPERATURE,
+        outputModerationEnabled: settings?.outputModerationEnabled ?? true,
+      },
+    });
+
     const [assistantMessage] = await db
       .insert(chatMessage)
-      .values({ id: crypto.randomUUID(), sessionId, role: "assistant", content })
+      .values({ id: crypto.randomUUID(), sessionId, role: "assistant", content: replyContent })
       .returning();
 
     await db.update(chatSession).set({ updatedAt: new Date() }).where(eq(chatSession.id, sessionId));
@@ -129,6 +177,40 @@ export async function sendChatMessage(input: {
       message: "Message sent.",
     };
   });
+}
+
+/**
+ * Retrieval + guardrails + generation — isolated from `sendChatMessage` so a
+ * provider failure can be caught here and turned into a plain-text reply
+ * (see the function's own callers) rather than aborting the whole action
+ * after the user's message has already been saved.
+ */
+async function generateReply(input: {
+  sessionId: string;
+  settings: { retrievalTopK: number; temperature: number; outputModerationEnabled: boolean };
+}): Promise<string> {
+  try {
+    const history = await loadRecentHistory(input.sessionId);
+    const latestQuestion = history.at(-1)?.content ?? "";
+
+    const chunks = await retrieveRelevantChunks(latestQuestion, input.settings.retrievalTopK);
+    const systemPrompt: ChatCompletionMessage = { role: "system", content: buildSystemPrompt(chunks) };
+
+    const { provider } = await getActiveChatProvider();
+    const rawReply = await provider.complete([systemPrompt, ...history], { temperature: input.settings.temperature });
+    const reply = stripSourcesWhenUnanswered(rawReply);
+
+    if (input.settings.outputModerationEnabled) {
+      const moderation = moderateOutput(reply);
+      if (!moderation.allowed) return MODERATION_REFUSAL_MESSAGE;
+    }
+
+    return reply;
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "an unknown error";
+    console.error("[chat] reply generation failed", error);
+    return `Sorry, I couldn't generate a reply: ${message}`;
+  }
 }
 
 export async function renameChatSession(input: { id: string; title: string }): Promise<ActionResult> {

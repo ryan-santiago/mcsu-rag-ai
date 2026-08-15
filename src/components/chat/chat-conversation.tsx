@@ -87,7 +87,8 @@ export function ChatConversation({ messages, isLoadingMessages, isSending, canWr
           </Button>
         </div>
         <p className="text-muted-foreground mx-auto mt-2 max-w-5xl text-center text-xs">
-          Placeholder chat — replies repeat what you send. Press Enter to send, Shift+Enter for a new line.
+          Answers are grounded in your organization&apos;s uploaded documents. Press Enter to send, Shift+Enter for
+          a new line.
         </p>
       </div>
     </div>

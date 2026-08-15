@@ -2,6 +2,7 @@
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
+import * as React from "react";
 import { toast } from "sonner";
 
 import { ChatConversation } from "@/components/chat/chat-conversation";
@@ -24,6 +25,12 @@ export function ChatPageView({ sessionId, canWrite }: ChatPageViewProps) {
   const router = useRouter();
   const queryClient = useQueryClient();
 
+  // Shown immediately on send, before the round trip (rate limit + retrieval + model
+  // call) resolves — otherwise the user's own message doesn't appear until the reply
+  // does. Local state rather than an optimistic cache write because a brand-new chat
+  // (`sessionId === null`) has no query key to write into yet.
+  const [pendingMessage, setPendingMessage] = React.useState<string | null>(null);
+
   const messagesQuery = useQuery<ChatMessage[]>({
     queryKey: chatMessagesQueryKey(sessionId ?? ""),
     queryFn: () => fetchChatMessages(sessionId as string),
@@ -33,6 +40,8 @@ export function ChatPageView({ sessionId, canWrite }: ChatPageViewProps) {
   const sendMutation = useMutation({
     mutationFn: sendChatMessage,
     onSuccess: (result) => {
+      setPendingMessage(null);
+
       if (!result.ok) {
         toast.error(result.error);
         return;
@@ -50,10 +59,22 @@ export function ChatPageView({ sessionId, canWrite }: ChatPageViewProps) {
       // move to its dedicated URL so a reload (or the sidebar) lands here.
       if (sessionId === null) router.push(`/chat/${resolvedId}`);
     },
-    onError: () => toast.error("Something went wrong. Please try again."),
+    onError: () => {
+      setPendingMessage(null);
+      toast.error("Something went wrong. Please try again.");
+    },
   });
 
-  const messages = sessionId === null ? [] : (messagesQuery.data ?? []);
+  function handleSend(content: string) {
+    setPendingMessage(content);
+    sendMutation.mutate({ sessionId, content });
+  }
+
+  const baseMessages = sessionId === null ? [] : (messagesQuery.data ?? []);
+  const messages =
+    pendingMessage === null
+      ? baseMessages
+      : [...baseMessages, { id: "pending", role: "user" as const, content: pendingMessage, createdAt: new Date() }];
 
   return (
     <div className="bg-card h-[calc(100svh-8rem)] min-h-128 overflow-hidden rounded-xl border">
@@ -62,7 +83,7 @@ export function ChatPageView({ sessionId, canWrite }: ChatPageViewProps) {
         isLoadingMessages={sessionId !== null && messagesQuery.isPending}
         isSending={sendMutation.isPending}
         canWrite={canWrite}
-        onSend={(content) => sendMutation.mutate({ sessionId, content })}
+        onSend={handleSend}
       />
     </div>
   );

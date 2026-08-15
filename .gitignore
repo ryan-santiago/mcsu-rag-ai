@@ -35,6 +35,10 @@ yarn-error.log*
 # ...except the template every clone copies from — see docs/SETUP.md
 !.env.example
 
+# uploaded documents — temporary local storage, see docs/ARCHITECTURE.md
+/public/uploads/documents/*
+!/public/uploads/documents/.gitkeep
+
 # vercel
 .vercel
 

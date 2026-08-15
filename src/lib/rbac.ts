@@ -47,6 +47,19 @@ export const PERMISSIONS = [
   /** Covers renaming a chat's title. */
   "chat:edit",
   "chat:delete",
+
+  "documents:read",
+  /** Uploading a new file, or (re)triggering embedding on one. */
+  "documents:write",
+  /** Replacing an existing file's bytes. */
+  "documents:edit",
+  "documents:delete",
+
+  "ai_settings:read",
+  "ai_settings:write",
+  /** Changing the active embedding provider/model or API key. */
+  "ai_settings:edit",
+  "ai_settings:delete",
 ] as const;
 
 export type Permission = (typeof PERMISSIONS)[number];
@@ -60,6 +73,8 @@ export type Permission = (typeof PERMISSIONS)[number];
 export const MODULES = [
   { id: "dashboard", label: "Dashboard" },
   { id: "chat", label: "Chat" },
+  { id: "documents", label: "Documentation" },
+  { id: "ai_settings", label: "AI Settings" },
   { id: "access_control", label: "Access Control" },
   { id: "users", label: "Users & Access" },
   { id: "settings", label: "Settings" },

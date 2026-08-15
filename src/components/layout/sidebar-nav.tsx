@@ -1,6 +1,15 @@
 "use client";
 
-import { LayoutDashboard, MessageSquare, Settings, ShieldCheck, Users, type LucideIcon } from "lucide-react";
+import {
+  BrainCircuit,
+  FileText,
+  LayoutDashboard,
+  MessageSquare,
+  Settings,
+  ShieldCheck,
+  Users,
+  type LucideIcon,
+} from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -13,6 +22,8 @@ import { isNavItemActive, type NavGroup, type NavIconKey } from "@/lib/navigatio
 const NAV_ICONS: Record<NavIconKey, LucideIcon> = {
   dashboard: LayoutDashboard,
   chat: MessageSquare,
+  documents: FileText,
+  "ai-settings": BrainCircuit,
   users: Users,
   "access-control": ShieldCheck,
   settings: Settings,

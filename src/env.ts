@@ -13,6 +13,10 @@ const serverSchema = z.object({
     .string()
     .min(32, "BETTER_AUTH_SECRET must be at least 32 characters — run `npx @better-auth/cli secret`"),
   BETTER_AUTH_URL: z.url().default("http://localhost:3000"),
+  ENCRYPTION_KEY: z
+    .string()
+    .regex(/^[0-9a-f]{64}$/i, "ENCRYPTION_KEY must be a 64-character hex string — see .env.example")
+    .transform((value) => Buffer.from(value, "hex")),
   NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
 });
 

@@ -15,6 +15,27 @@
       "when": 1786729883149,
       "tag": "0001_chat_tables",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1786758082677,
+      "tag": "0002_add_document_table",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1786771128867,
+      "tag": "0003_add_embedding_pipeline",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1786775309972,
+      "tag": "0004_add_chat_retrieval",
+      "breakpoints": true
     }
   ]
 }
