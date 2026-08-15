@@ -7,8 +7,9 @@ import { z } from "zod";
 import { db } from "@/db";
 import { aiSettings } from "@/db/schema";
 import { diffFields, recordAudit } from "@/lib/audit";
-import { encryptSecret } from "@/lib/crypto/secrets";
-import { listOllamaModels } from "@/lib/embeddings";
+import { AnthropicChatProvider, OllamaChatProvider, OpenAIChatProvider } from "@/lib/chat-completion";
+import { decryptSecret, encryptSecret } from "@/lib/crypto/secrets";
+import { listOllamaModels, OllamaEmbeddingProvider, OpenAIEmbeddingProvider } from "@/lib/embeddings";
 import { authorize, AuthorizationError } from "@/lib/session";
 
 import { getAiSettings } from "./queries";
@@ -135,6 +136,54 @@ export async function saveEmbeddingSettings(input: SaveEmbeddingSettingsInput): 
   });
 }
 
+/**
+ * Tries an actual embed call against whatever's currently typed in the
+ * form — not the saved settings — so a bad URL/model/key is caught before
+ * "Save settings" is even clicked. A blank API key falls back to the
+ * already-saved one (same as saving does), so testing after just switching
+ * models doesn't require re-entering a key that's already stored.
+ */
+export async function testEmbeddingConnection(input: SaveEmbeddingSettingsInput): Promise<ActionResult> {
+  return run(async () => {
+    await authorize("ai_settings:read");
+    const parsed = saveEmbeddingSchema.parse(input);
+
+    let provider: OllamaEmbeddingProvider | OpenAIEmbeddingProvider;
+    let label: string;
+
+    if (parsed.provider === "ollama") {
+      provider = new OllamaEmbeddingProvider(parsed.ollamaBaseUrl, parsed.ollamaModel);
+      label = `Ollama (${parsed.ollamaModel})`;
+    } else {
+      let apiKey = parsed.apiKey;
+      if (!apiKey) {
+        const [existing] = await db.select().from(aiSettings).where(eq(aiSettings.id, "default")).limit(1);
+        if (existing?.apiKeyCiphertext && existing.apiKeyIv && existing.apiKeyAuthTag) {
+          apiKey = decryptSecret({
+            ciphertext: existing.apiKeyCiphertext,
+            iv: existing.apiKeyIv,
+            authTag: existing.apiKeyAuthTag,
+          });
+        }
+      }
+      if (!apiKey) return { ok: false, error: "Enter an API key to test." };
+      provider = new OpenAIEmbeddingProvider(apiKey, parsed.apiModel);
+      label = `OpenAI (${parsed.apiModel})`;
+    }
+
+    try {
+      const embedding = await provider.embed("Connection test.");
+      return {
+        ok: true,
+        data: undefined,
+        message: `Connected to ${label} — returned a ${embedding.length}-dimensional embedding.`,
+      };
+    } catch (error) {
+      return { ok: false, error: error instanceof Error ? error.message : "Connection test failed." };
+    }
+  });
+}
+
 /** Populates the model picker for the "Local (Ollama)" branch of either form. */
 export async function fetchOllamaModels(baseUrl: string): Promise<ActionResult<string[]>> {
   return run(async () => {
@@ -252,5 +301,56 @@ export async function saveChatSettings(input: SaveChatSettingsInput): Promise<Ac
     revalidatePath("/admin/ai-settings");
 
     return { ok: true, data: undefined, message: "Chat & retrieval settings saved." };
+  });
+}
+
+/**
+ * Tries an actual chat completion against whatever's currently typed in the
+ * form — same reasoning as `testEmbeddingConnection()`. The Ollama branch
+ * uses the already-saved `ollamaBaseUrl` (the chat form has no base-URL
+ * field of its own — it shares the embedding card's).
+ */
+export async function testChatConnection(input: SaveChatSettingsInput): Promise<ActionResult> {
+  return run(async () => {
+    await authorize("ai_settings:read");
+    const parsed = saveChatSchema.parse(input);
+
+    const [existing] = await db.select().from(aiSettings).where(eq(aiSettings.id, "default")).limit(1);
+
+    let provider: OllamaChatProvider | OpenAIChatProvider | AnthropicChatProvider;
+    let label: string;
+
+    if (parsed.chatProvider === "ollama") {
+      const baseUrl = existing?.ollamaBaseUrl ?? "http://localhost:11434";
+      provider = new OllamaChatProvider(baseUrl, parsed.ollamaChatModel);
+      label = `Ollama (${parsed.ollamaChatModel})`;
+    } else {
+      let apiKey = parsed.chatApiKey;
+      if (!apiKey && existing?.chatApiKeyCiphertext && existing.chatApiKeyIv && existing.chatApiKeyAuthTag) {
+        apiKey = decryptSecret({
+          ciphertext: existing.chatApiKeyCiphertext,
+          iv: existing.chatApiKeyIv,
+          authTag: existing.chatApiKeyAuthTag,
+        });
+      }
+      if (!apiKey) return { ok: false, error: "Enter an API key to test." };
+
+      if (parsed.chatApiProvider === "anthropic") {
+        provider = new AnthropicChatProvider(apiKey, parsed.chatApiModel);
+        label = `Anthropic (${parsed.chatApiModel})`;
+      } else {
+        provider = new OpenAIChatProvider(apiKey, parsed.chatApiModel);
+        label = `OpenAI (${parsed.chatApiModel})`;
+      }
+    }
+
+    try {
+      const reply = await provider.complete([{ role: "user", content: "Reply with only the word: OK" }], {
+        temperature: 0,
+      });
+      return { ok: true, data: undefined, message: `Connected to ${label} — replied "${reply.trim().slice(0, 40)}".` };
+    } catch (error) {
+      return { ok: false, error: error instanceof Error ? error.message : "Connection test failed." };
+    }
   });
 }

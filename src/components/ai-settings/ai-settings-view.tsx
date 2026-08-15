@@ -2,7 +2,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Loader2, RotateCcw } from "lucide-react";
+import { Loader2, PlugZap, RotateCcw } from "lucide-react";
 import { useForm, useWatch } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -27,7 +27,14 @@ import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useDebounced } from "@/hooks/use-debounced";
 import { can, type Principal } from "@/lib/rbac";
-import { fetchAiSettings, fetchOllamaModels, saveChatSettings, saveEmbeddingSettings } from "@/server/ai-settings/actions";
+import {
+  fetchAiSettings,
+  fetchOllamaModels,
+  saveChatSettings,
+  saveEmbeddingSettings,
+  testChatConnection,
+  testEmbeddingConnection,
+} from "@/server/ai-settings/actions";
 import { aiSettingsQueryKey } from "@/server/ai-settings/query-key";
 import type { AiSettingsView, SaveChatSettingsInput, SaveEmbeddingSettingsInput } from "@/server/ai-settings/types";
 
@@ -177,18 +184,23 @@ function EmbeddingSettingsForm({ settings, canEdit }: { settings: AiSettingsView
     onError: () => toast.error("Something went wrong. Please try again."),
   });
 
-  function onSubmit(values: EmbeddingFormValues) {
-    const input: SaveEmbeddingSettingsInput =
-      values.provider === "ollama"
-        ? { provider: "ollama", ollamaBaseUrl: values.ollamaBaseUrl, ollamaModel: values.ollamaModel }
-        : {
-            provider: "api",
-            apiProvider: "openai",
-            apiModel: values.apiModel,
-            apiKey: values.apiKey || undefined,
-          };
+  const testMutation = useMutation({
+    mutationFn: (input: SaveEmbeddingSettingsInput) => testEmbeddingConnection(input),
+    onSuccess: (result) => {
+      if (result.ok) toast.success(result.message);
+      else toast.error(result.error);
+    },
+    onError: () => toast.error("Something went wrong. Please try again."),
+  });
 
-    mutation.mutate(input);
+  function toInput(values: EmbeddingFormValues): SaveEmbeddingSettingsInput {
+    return values.provider === "ollama"
+      ? { provider: "ollama", ollamaBaseUrl: values.ollamaBaseUrl, ollamaModel: values.ollamaModel }
+      : { provider: "api", apiProvider: "openai", apiModel: values.apiModel, apiKey: values.apiKey || undefined };
+  }
+
+  function onSubmit(values: EmbeddingFormValues) {
+    mutation.mutate(toInput(values));
   }
 
   return (
@@ -357,7 +369,20 @@ function EmbeddingSettingsForm({ settings, canEdit }: { settings: AiSettingsView
           </CardContent>
 
           {canEdit ? (
-            <CardFooter className="justify-end">
+            <CardFooter className="justify-end gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                disabled={testMutation.isPending}
+                onClick={() => testMutation.mutate(toInput(form.getValues()))}
+              >
+                {testMutation.isPending ? (
+                  <Loader2 className="size-4 animate-spin" aria-hidden />
+                ) : (
+                  <PlugZap className="size-4" aria-hidden />
+                )}
+                Test connection
+              </Button>
               <Button type="submit" disabled={mutation.isPending}>
                 {mutation.isPending ? <Loader2 className="size-4 animate-spin" aria-hidden /> : null}
                 Save settings
@@ -421,8 +446,17 @@ function ChatSettingsForm({ settings, canEdit }: { settings: AiSettingsView; can
     onError: () => toast.error("Something went wrong. Please try again."),
   });
 
-  function onSubmit(values: ChatFormValues) {
-    const input: SaveChatSettingsInput = {
+  const testMutation = useMutation({
+    mutationFn: (input: SaveChatSettingsInput) => testChatConnection(input),
+    onSuccess: (result) => {
+      if (result.ok) toast.success(result.message);
+      else toast.error(result.error);
+    },
+    onError: () => toast.error("Something went wrong. Please try again."),
+  });
+
+  function toInput(values: ChatFormValues): SaveChatSettingsInput {
+    return {
       chatProvider: values.chatProvider,
       ollamaChatModel: values.ollamaChatModel,
       chatApiProvider: values.chatApiProvider,
@@ -433,8 +467,10 @@ function ChatSettingsForm({ settings, canEdit }: { settings: AiSettingsView; can
       rateLimitPerMinute: values.rateLimitPerMinute,
       outputModerationEnabled: values.outputModerationEnabled,
     } as SaveChatSettingsInput;
+  }
 
-    mutation.mutate(input);
+  function onSubmit(values: ChatFormValues) {
+    mutation.mutate(toInput(values));
   }
 
   return (
@@ -695,7 +731,20 @@ function ChatSettingsForm({ settings, canEdit }: { settings: AiSettingsView; can
           </CardContent>
 
           {canEdit ? (
-            <CardFooter className="justify-end">
+            <CardFooter className="justify-end gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                disabled={testMutation.isPending}
+                onClick={() => testMutation.mutate(toInput(form.getValues()))}
+              >
+                {testMutation.isPending ? (
+                  <Loader2 className="size-4 animate-spin" aria-hidden />
+                ) : (
+                  <PlugZap className="size-4" aria-hidden />
+                )}
+                Test connection
+              </Button>
               <Button type="submit" disabled={mutation.isPending}>
                 {mutation.isPending ? <Loader2 className="size-4 animate-spin" aria-hidden /> : null}
                 Save settings

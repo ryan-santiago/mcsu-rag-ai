@@ -8,7 +8,7 @@ import { OllamaChatProvider } from "./ollama";
 import { OpenAIChatProvider } from "./openai";
 import { ChatCompletionError, type ChatCompletionProvider } from "./provider";
 
-export { ChatCompletionError };
+export { AnthropicChatProvider, ChatCompletionError, OllamaChatProvider, OpenAIChatProvider };
 export type { ChatCompletionMessage, ChatCompletionProvider } from "./provider";
 
 const DEFAULT_OLLAMA_BASE_URL = "http://localhost:11434";

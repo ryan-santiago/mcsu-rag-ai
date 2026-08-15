@@ -7,7 +7,7 @@ import { listOllamaModels, OllamaEmbeddingProvider } from "./ollama";
 import { OpenAIEmbeddingProvider } from "./openai";
 import { EmbeddingProviderError, type EmbeddingProvider } from "./provider";
 
-export { EmbeddingProviderError, listOllamaModels };
+export { EmbeddingProviderError, listOllamaModels, OllamaEmbeddingProvider, OpenAIEmbeddingProvider };
 export type { EmbeddingProvider };
 
 const DEFAULT_OLLAMA_BASE_URL = "http://localhost:11434";
